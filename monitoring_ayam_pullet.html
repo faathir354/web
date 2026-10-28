@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring Ayam Pullet</title>
+<style>
+:root{--green:#176b45;--green2:#228657;--bg:#f4f7f4;--ink:#1d2b23;--muted:#65756b;--line:#dfe8e1;--orange:#f2a541;--red:#d94b4b}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,#124b34,#218354);color:#fff;padding:24px 5vw 30px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:14px;background:#ffffff22;display:grid;place-items:center;font-size:27px}
+h1{font-size:clamp(23px,4vw,34px);margin:0 0 5px}header p{margin:0;color:#d9eee1}.date-pill{background:#ffffff1c;border:1px solid #ffffff38;padding:10px 14px;border-radius:999px;font-size:13px}
+main{max-width:1200px;margin:-12px auto 40px;padding:0 20px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.tab{border:1px solid var(--line);background:white;color:var(--muted);padding:11px 16px;border-radius:11px;cursor:pointer;font-weight:700}.tab.active{background:var(--green);border-color:var(--green);color:#fff}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 3px 12px #173b2410}.metric-label{font-size:13px;color:var(--muted);margin-bottom:12px}.metric{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.5px}.metric small{font-size:13px;font-weight:600;color:var(--muted)}.metric-note{font-size:12px;color:var(--muted);margin-top:8px}.green{color:var(--green)}.orange{color:#b66a0c}.red{color:var(--red)}
+.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.panel{margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.panel h2{font-size:17px;margin:0}.sub{font-size:12px;color:var(--muted)}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-size:12px;font-weight:700;color:#506257}input,select,textarea{font:inherit;font-size:14px;padding:11px 12px;border:1px solid #d6e1d8;border-radius:10px;background:#fcfdfc;color:var(--ink);width:100%;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--green2);box-shadow:0 0 0 3px #22865717}textarea{resize:vertical;min-height:75px}.btn{border:0;border-radius:10px;padding:11px 15px;background:var(--green);color:#fff;font-weight:800;cursor:pointer}.btn:hover{background:#105637}.btn.secondary{background:#edf5ef;color:var(--green);border:1px solid #d7e8dc}.btn.danger{background:#fff0f0;color:#b42d2d;border:1px solid #f5d2d2}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:650px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf1ed}th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:#f8faf8}tbody tr:hover{background:#fbfdfb}.status{display:inline-block;border-radius:99px;padding:5px 9px;font-size:11px;font-weight:800}.status.ok{background:#e6f5eb;color:#176b45}.status.warn{background:#fff1d9;color:#99600a}.status.bad{background:#ffe7e7;color:#b52c2c}.empty{text-align:center;color:var(--muted);padding:26px}.bar-list{display:flex;flex-direction:column;gap:14px}.bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}.track{height:9px;background:#edf2ee;border-radius:99px;overflow:hidden}.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#3ca56c,#176b45)}.notice{background:#fff8e9;border:1px solid #f3dfb5;border-radius:12px;padding:13px;font-size:13px;color:#77531a;line-height:1.5}.section{display:none}.section.active{display:block}.footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}.small{font-size:12px;color:var(--muted)}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}}
+@media(max-width:520px){main{padding:0 12px}.cards{gap:9px}.card,.panel{padding:14px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.date-pill{width:100%;text-align:center}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="brand"><div class="logo">🐣</div><div><h1>Monitoring Ayam Pullet</h1><p>Dashboard pemantauan pertumbuhan, pakan, kesehatan, dan populasi</p></div></div><div class="date-pill" id="today"></div></div></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-tab="dashboard">Ringkasan</button>
+<button class="tab" data-tab="input">Input Harian</button>
+<button class="tab" data-tab="history">Riwayat Monitoring</button>
+<button class="tab" data-tab="flock">Data Kandang</button>
+</div>
+<section id="dashboard" class="section active">
+<div class="cards">
+<div class="card"><div class="metric-label">Populasi saat ini</div><div class="metric" id="m-pop">0 <small>ekor</small></div><div class="metric-note">Setelah dikurangi kematian</div></div>
+<div class="card"><div class="metric-label">Umur ayam</div><div class="metric" id="m-age">0 <small>minggu</small></div><div class="metric-note" id="age-note">Umur berdasarkan tanggal masuk</div></div>
+<div class="card"><div class="metric-label">Bobot rata-rata terakhir</div><div class="metric" id="m-weight">— <small>gram</small></div><div class="metric-note">Diambil dari data monitoring terbaru</div></div>
+<div class="card"><div class="metric-label">Mortalitas kumulatif</div><div class="metric" id="m-mort">0% </div><div class="metric-note" id="mort-note">0 ekor mati tercatat</div></div>
+</div>
+<div class="layout">
+<div>
+<div class="panel"><div class="panel-head"><h2>Monitoring terakhir</h2><span class="sub" id="last-date">Belum ada data</span></div><div class="bar-list" id="latest-bars"><div class="empty">Tambahkan data harian untuk melihat ringkasan.</div></div></div>
+<div class="panel"><div class="panel-head"><h2>Aktivitas terbaru</h2><button class="btn secondary" onclick="switchTab('history')">Lihat riwayat</button></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Bobot (g)</th><th>Pakan (kg)</th><th>Air (L)</th><th>Kematian</th><th>Kondisi</th></tr></thead><tbody id="recent-table"></tbody></table></div></div>
+</div>
+<div>
+<div class="panel"><div class="panel-head"><h2>Profil kandang</h2><span class="sub">Data dasar</span></div><div id="flock-summary" class="bar-list"></div></div>
+<div class="panel"><div class="panel-head"><h2>Pengingat pemeriksaan</h2></div><div class="notice">Gunakan catatan harian untuk menandai jadwal vaksin, kondisi litter, ventilasi, suhu, dan gejala penyakit. Target bobot serta konsumsi harus dibandingkan dengan panduan strain ayam dan arahan dokter hewan/petugas teknis.</div></div>
+</div>
+</div>
+</section>
+<section id="input" class="section">
+<div class="panel"><div class="panel-head"><h2>Input monitoring harian</h2><span class="sub">Isi sesuai hasil pengamatan</span></div>
+<form id="daily-form"><div class="form-grid">
+<div class="field"><label for="d-date">Tanggal *</label><input id="d-date" type="date" required></div>
+<div class="field"><label for="d-age">Umur ayam (minggu)</label><input id="d-age" type="number" min="0" step="0.1" placeholder="Contoh: 8"></div>
+<div class="field"><label for="d-weight">Bobot rata-rata (gram)</label><input id="d-weight" type="number" min="0" step="1" placeholder="Contoh: 650"></div>
+<div class="field"><label for="d-feed">Pakan diberikan (kg)</label><input id="d-feed" type="number" min="0" step="0.1" placeholder="Contoh: 35"></div>
+<div class="field"><label for="d-water">Air minum (liter)</label><input id="d-water" type="number" min="0" step="0.1" placeholder="Contoh: 60"></div>
+<div class="field"><label for="d-dead">Ayam mati hari ini (ekor)</label><input id="d-dead" type="number" min="0" step="1" value="0"></div>
+<div class="field"><label for="d-cull">Afkir hari ini (ekor)</label><input id="d-cull" type="number" min="0" step="1" value="0"></div>
+<div class="field"><label for="d-temp">Suhu kandang (°C)</label><input id="d-temp" type="number" min="0" step="0.1" placeholder="Contoh: 27.5"></div>
+<div class="field"><label for="d-vaccine">Vaksin / obat / tindakan</label><input id="d-vaccine" type="text" placeholder="Contoh: vaksin ND sesuai jadwal"></div>
+<div class="field"><label for="d-condition">Kondisi umum</label><select id="d-condition"><option value="Normal">Normal</option><option value="Perlu dipantau">Perlu dipantau</option><option value="Tidak normal">Tidak normal</option></select></div>
+<div class="field full"><label for="d-notes">Catatan / gejala / tindakan lanjutan</label><textarea id="d-notes" placeholder="Contoh: nafsu makan menurun pada sebagian ayam, litter perlu diperbaiki..."></textarea></div>
+</div><div class="actions"><button class="btn" type="submit">Simpan data harian</button><button class="btn secondary" type="reset">Kosongkan formulir</button></div><p class="small">Data disimpan pada browser/perangkat ini. Ekspor cadangan secara berkala agar data tidak hilang saat data browser dibersihkan.</p></form>
+</div>
+</section>
+<section id="history" class="section">
+<div class="panel"><div class="panel-head"><h2>Riwayat monitoring</h2><div class="actions" style="margin:0"><button class="btn secondary" onclick="exportCSV()">Ekspor CSV</button><button class="btn secondary" onclick="exportJSON()">Cadangkan JSON</button><label class="btn secondary" style="display:inline-flex;align-items:center;cursor:pointer">Impor JSON<input type="file" accept=".json,application/json" id="import-file" style="display:none"></label></div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Umur (mg)</th><th>Bobot (g)</th><th>Pakan (kg)</th><th>Air (L)</th><th>Mati</th><th>Afkir</th><th>Suhu</th><th>Kondisi</th><th>Catatan</th><th>Aksi</th></tr></thead><tbody id="history-table"></tbody></table></div><div id="history-empty" class="empty">Belum ada data monitoring.</div></div>
+</section>
+<section id="flock" class="section">
+<div class="panel"><div class="panel-head"><h2>Pengaturan data kandang</h2><span class="sub">Isi satu kali, perbarui bila ada perubahan</span></div>
+<form id="flock-form"><div class="form-grid">
+<div class="field"><label for="f-name">Nama kandang / kelompok</label><input id="f-name" placeholder="Contoh: Kandang Pullet A"></div>
+<div class="field"><label for="f-strain">Strain / jenis ayam</label><input id="f-strain" placeholder="Contoh: Isa Brown / Lohmann"></div>
+<div class="field"><label for="f-start">Tanggal DOC masuk / mulai pemeliharaan</label><input id="f-start" type="date"></div>
+<div class="field"><label for="f-pop">Populasi awal (ekor) *</label><input id="f-pop" type="number" min="1" required placeholder="Contoh: 1000"></div>
+<div class="field"><label for="f-location">Lokasi kandang</label><input id="f-location" placeholder="Contoh: Kandang 1"></div>
+<div class="field"><label for="f-manager">Penanggung jawab</label><input id="f-manager" placeholder="Nama petugas"></div>
+</div><div class="actions"><button class="btn" type="submit">Simpan profil kandang</button></div></form></div>
+<div class="panel"><h2 style="margin:0 0 12px">Catatan penggunaan</h2><p class="small" style="line-height:1.7">Website ini merupakan alat pencatatan operasional, bukan alat diagnosis. Periksa data bobot dan konsumsi terhadap standar strain, umur, kualitas pakan, serta kondisi lingkungan. Jika ada peningkatan kematian atau gejala penyakit, segera konsultasikan dengan dokter hewan atau petugas kesehatan hewan.</p><button class="btn danger" onclick="clearAll()">Hapus semua data lokal</button></div>
+</section>
+<div class="footer">Monitoring Ayam Pullet · Versi awal · Data tersimpan lokal di perangkat</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const load=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
+let records=load('pullet_records',[]), flock=load('pullet_flock',{name:'Kandang Pullet',strain:'Belum diisi',start:'',pop:0,location:'',manager:''});
+$('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+$('d-date').value=todayISO();
+function save(){localStorage.setItem('pullet_records',JSON.stringify(records));localStorage.setItem('pullet_flock',JSON.stringify(flock))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtDate(s){if(!s)return '—';return new Date(s+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}
+function num(v){return v===null||v===undefined||v===''?'—':Number(v).toLocaleString('id-ID',{maximumFractionDigits:1})}
+function currentPop(){return Math.max(0,Number(flock.pop||0)-records.reduce((a,r)=>a+Number(r.dead||0)+Number(r.cull||0),0))}
+function ageWeeks(){if(!flock.start)return null;return Math.max(0,(new Date(todayISO())-new Date(flock.start+'T00:00:00'))/604800000)}
+function sorted(){return [...records].sort((a,b)=>b.date.localeCompare(a.date))}
+function render(){
+ const s=sorted(), latest=s[0], dead=records.reduce((a,r)=>a+Number(r.dead||0),0), cull=records.reduce((a,r)=>a+Number(r.cull||0),0), start=Number(flock.pop||0);
+ $('m-pop').innerHTML=`${currentPop().toLocaleString('id-ID')} <small>ekor</small>`;
+ const age=ageWeeks();$('m-age').innerHTML=`${age===null?'—':(age).toLocaleString('id-ID',{maximumFractionDigits:1})} <small>minggu</small>`;$('age-note').textContent=age===null?'Isi tanggal mulai pemeliharaan di Data Kandang':'Umur dihitung dari tanggal mulai pemeliharaan';
+ $('m-weight').innerHTML=`${latest&&latest.weight!==''?num(latest.weight):'—'} <small>gram</small>`;
+ const mort=start?((dead+cull)/start*100):0;$('m-mort').textContent=start?mort.toLocaleString('id-ID',{maximumFractionDigits:2})+'%':'—';$('mort-note').textContent=`${dead} mati · ${cull} afkir dari ${start||0} ekor awal`;
+ $('last-date').textContent=latest?fmtDate(latest.date):'Belum ada data';
+ const metrics=latest?[['Bobot rata-rata',num(latest.weight),'gram'],['Pakan diberikan',num(latest.feed),'kg'],['Air minum',num(latest.water),'liter'],['Suhu kandang',num(latest.temp),'°C']]:[];
+ $('latest-bars').innerHTML=metrics.length?metrics.map(([label,val,unit])=>`<div><div class="bar-label"><span>${label}</span><strong>${val} ${unit}</strong></div><div class="track"><div class="fill" style="width:${val==='—'?0:Math.min(100,Number(val.replace('.',''))/10)}%"></div></div></div>`).join(''):'<div class="empty">Tambahkan data harian untuk melihat ringkasan.</div>';
+ $('recent-table').innerHTML=s.slice(0,5).map(r=>`<tr><td>${fmtDate(r.date)}</td><td>${num(r.weight)}</td><td>${num(r.feed)}</td><td>${num(r.water)}</td><td>${num(r.dead)}</td><td>${status(r.condition)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
+ $('flock-summary').innerHTML=[['Nama kandang',flock.name||'—'],['Strain',flock.strain||'—'],['Lokasi',flock.location||'—'],['Penanggung jawab',flock.manager||'—'],['Populasi awal',`${num(flock.pop)} ekor`],['Tanggal mulai',fmtDate(flock.start)]].map(([a,b])=>`<div class="bar-label"><span>${a}</span><strong>${esc(b)}</strong></div>`).join('');
+ $('history-table').innerHTML=s.map(r=>`<tr><td>${fmtDate(r.date)}</td><td>${num(r.age)}</td><td>${num(r.weight)}</td><td>${num(r.feed)}</td><td>${num(r.water)}</td><td>${num(r.dead)}</td><td>${num(r.cull)}</td><td>${num(r.temp)}</td><td>${status(r.condition)}</td><td title="${esc(r.notes)}">${esc((r.notes||'').slice(0,55))}${(r.notes||'').length>55?'…':''}${r.vaccine?'<br><span class="small">Tindakan: '+esc(r.vaccine)+'</span>':''}</td><td><button class="btn danger" onclick="removeRecord('${r.id}')">Hapus</button></td></tr>`).join('');
+ $('history-empty').style.display=s.length?'none':'block';
+}
+function status(v){let cls=v==='Normal'?'ok':v==='Perlu dipantau'?'warn':'bad';return `<span class="status ${cls}">${esc(v||'—')}</span>`}
+function switchTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===name));if(name==='input')$('d-date').value=todayISO()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+$('daily-form').addEventListener('submit',e=>{e.preventDefault();const date=$('d-date').value;const existing=records.findIndex(r=>r.date===date);const r={id:existing>=0?records[existing].id:(Date.now().toString(36)+Math.random().toString(36).slice(2,6)),date,age:$('d-age').value,weight:$('d-weight').value,feed:$('d-feed').value,water:$('d-water').value,dead:$('d-dead').value||0,cull:$('d-cull').value||0,temp:$('d-temp').value,vaccine:$('d-vaccine').value,condition:$('d-condition').value,notes:$('d-notes').value};if(existing>=0){if(!confirm('Data tanggal ini sudah ada. Ganti dengan data baru?'))return;records[existing]=r}else records.push(r);save();render();e.target.reset();$('d-date').value=todayISO();$('d-dead').value=0;$('d-cull').value=0;switchTab('dashboard');alert('Data monitoring berhasil disimpan pada perangkat ini.')});
+$('flock-form').addEventListener('submit',e=>{e.preventDefault();flock={name:$('f-name').value,strain:$('f-strain').value,start:$('f-start').value,pop:Number($('f-pop').value||0),location:$('f-location').value,manager:$('f-manager').value};save();render();alert('Profil kandang tersimpan.')});
+function fillFlock(){$('f-name').value=flock.name||'';$('f-strain').value=flock.strain||'';$('f-start').value=flock.start||'';$('f-pop').value=flock.pop||'';$('f-location').value=flock.location||'';$('f-manager').value=flock.manager||''}
+function removeRecord(id){if(confirm('Hapus catatan monitoring ini?')){records=records.filter(r=>r.id!==id);save();render()}}
+function download(name,content,type){const a=document.createElement('a');const u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
+function exportJSON(){download('cadangan-monitoring-pullet.json',JSON.stringify({flock,records},null,2),'application/json')}
+function exportCSV(){const cols=['date','age','weight','feed','water','dead','cull','temp','condition','vaccine','notes'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';download('riwayat-monitoring-pullet.csv',[cols.join(';'),...sorted().map(r=>cols.map(k=>q(r[k])).join(';'))].join('\r\n'),'text/csv;charset=utf-8;')}
+$('import-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.records))throw Error();if(!confirm('Impor akan mengganti data monitoring dan profil yang ada. Lanjutkan?'))return;records=data.records;flock=data.flock||flock;save();fillFlock();render();alert('Data berhasil diimpor.')}catch{alert('File tidak valid. Pilih file cadangan JSON dari website ini.')}e.target.value=''});
+function clearAll(){if(confirm('Yakin ingin menghapus seluruh data kandang dan riwayat dari browser ini? Ekspor cadangan terlebih dahulu jika diperlukan.')){records=[];flock={name:'Kandang Pullet',strain:'Belum diisi',start:'',pop:0,location:'',manager:''};save();fillFlock();render()}}
+fillFlock();render();
+</script>
+</body>
+</html>
